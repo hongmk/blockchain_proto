@@ -30,11 +30,10 @@ def chain():
 	#print(json.dumps(test_obj.blockchain.chain, indent = 4))
 	return jsonify(test_obj.blockchain.chain), 200
 
-#체인에 연결된 모든 블록의 해시값 산출
-@app.route('/chains/hash', methods=['GET'])
-def get_hash_list():
-	return jsonify(test_obj.get_hash_all())
-
+#블록 변조 검증(이전 해시값 확인)
+@app.route('/chains/verify', methods=['GET'])
+def verify_block():
+	return jsonify(test_obj.verify_of_chain())
 
 #0.0.0.0:5000 포트로 리스닝
 if __name__ == '__main__':
