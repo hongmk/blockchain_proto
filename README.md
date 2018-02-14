@@ -1,10 +1,8 @@
-# blockchain_proto
+﻿# blockchain_proto
 
 Introduction
-
     -블록체인의 가장 기본구조를 구현 및 테스트함
     -현재는 단일 노드에서 거래와 블록등록, 검증작업을함 (추후 빌드업 예정)
-    
 
 Test Guide
 
@@ -33,3 +31,11 @@ Test Guide
     		-체인에 새로운 거래 블록 생성
     	3) http://192.168.99.100:5001/chains/verify
     		-마지막 블록의 이전해시값 (previous_hash) 와 직전블록의 block_hash를 비교함
+
+
+Link
+
+	시연영상(Docker): https://youtu.be/3ueLpYJkT6Q
+   	시연영상(local): https://youtu.be/t4QL184S0OI
+
+
