@@ -1,6 +1,6 @@
 from test_blockchain import *
 from creathash import *
-import requests
+#import requests
 from flask import Flask, jsonify, request
 
 #초기 블록 생성
