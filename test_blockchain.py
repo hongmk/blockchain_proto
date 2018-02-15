@@ -27,11 +27,16 @@ class BlockchainTestCase:
 
         if result['result']:
             print("이전 해시 검증 완료")
-            
         else:
             print("해시값 불일치!")
         
         return result
+
+    def register_node(self, address):
+        result = self.blockchain.register_node(address)
+
+        return result
+           
 
 class TestSingleNodeAndBlocks(BlockchainTestCase):
 

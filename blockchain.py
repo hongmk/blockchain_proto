@@ -1,12 +1,15 @@
 from time import time
 from creathash import *
+import json
 
 class Blockchain:
     def __init__(self):
         self.current_transactions = []
         self.chain = []
-        # Create the genesis block
+        self.nodes = []
         self.new_block(previous_hash='0')
+        #최초 생성시 자신을 노드리스트에 추가하며, 최초 노드가 마스터가됨
+        self.register_node('127.0.0.1:5000', False ,1)
 
     def new_block(self, previous_hash):
         #새로운 블록을 생성 후 체인에 등록한다
@@ -48,7 +51,6 @@ class Blockchain:
         #최초블록만 존재하는 경우는 검증하지 않음
         try:
             assert len(self.chain) > 1
-
         except:
             result = {'result': False, 'msg':'거래블록 생성 전입니다.'}
             error_bit = 1
@@ -59,13 +61,76 @@ class Blockchain:
 
             if prev_block_hash == cur_block_hash:
                 result = {'result': True, 'msg': '검증성공'}
-
             else: 
                 result = {'result': False, 'msg': '검증실패'}
 
         return result
 
+    def register_node(self, address, status=True, node_type=2):
+        #노드중복체크 -> 노드생성 -> 노드등록 프로세스임 
+        dup_check = 0
+        if len(self.nodes) > 0:
+            dup_check = self.check_node_dup(address)
+        else:
+            dup_check = 1
+
+        if dup_check != 0:
+            if dup_check == 1:
+                self.node = Node()
+                self.node_info = self.node.set_node_info(address, status, node_type)
+                self.nodes.append(self.node_info)
+                print(json.dumps(self.nodes))
+                result =  {'result':True , 'msg':'노드 등록 성공'}
+            elif dup_check == 2:
+                result =  {'result':True , 'msg':'비활성 노드를 활성화합니다.'}
+
+            #새로 생성되거나 상태가 변경된 노드를 다시 전송함
+            self.spread_node_list()
+
+        else:
+            result = {'result':False , 'msg':'이미 활성상태인 노드가 존재합니다.'}
+
+        return result
+
+    def check_node_dup(self, address):
+        #노드 중복체크 프로세스이며, 이미 존재하는 노드의 상태가 False 였을 경우 True로만 변경함
+        result = 0
+
+        for node in self.nodes:
+            result = 1
+
+            if node['address'] == address:
+                result = 0
+                if node['status'] == False:
+                    node['status'] = True
+                    result = 2
+                return result
+            else:
+                print('중복없음')
+        
+        result = 1
+
+        return result       
+
+    def spread_node_list(self):
+        #활성상태인 모든 모드에 새로등록되거나 상태가 변경된 노드를 전송함
+        print('전송대상 노드:', json.dumps(self.nodes[-1], indent = 4, sort_keys=True))
+
     @property
     def last_block(self):
         return self.chain[-1]
+
+class Node:
+    def __init__(self):
+        self.node_info = {}
+
+    def set_node_info(self, address, status, node_type):
+        self.node_info = {
+            'address': address,         #추가되는 노드의 IP:PORT
+            'status': status,           #노드의 상태 True: 활성상태 , False:비활성상태
+            'node_type': node_type      #노드의 타입 1: 마스터 , 2: 참가자
+        }
+
+        return self.node_info
+
 

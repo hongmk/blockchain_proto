@@ -6,7 +6,6 @@ import hashlib, json, sys
 def getHash(block=""):
 
 	if type(block)!=str:
-		print("not string")
 		block = json.dumps(block,sort_keys=True)
 
 	if sys.version_info.major == 2:

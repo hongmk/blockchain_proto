@@ -39,6 +39,19 @@ def chain():
 def verify_block():
 	return jsonify(test_obj.verify_of_chain())
 
+@app.route('/nodes/register', methods=['POST'])
+def register_node():
+	values = request.form
+	result = test_obj.register_node(values['address'])
+
+	return jsonify(result), 201
+
+@app.route('/nodes/list', methods=['GET'])
+def all_node_list():
+
+	return jsonify(test_obj.blockchain.nodes), 200
+
+
 #0.0.0.0:5000 포트로 리스닝
 if __name__ == '__main__':
     from argparse import ArgumentParser
