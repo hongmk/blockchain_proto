@@ -5,7 +5,6 @@ class Blockchain:
     def __init__(self):
         self.current_transactions = []
         self.chain = []
-        self.nodes = set()
         # Create the genesis block
         self.new_block(previous_hash='0')
 
@@ -42,7 +41,6 @@ class Blockchain:
 
         return self.last_block['header']['version'] + 1
 
-
     def verify_of_chain(self):
         result = {}
         error_bit = 0
@@ -50,6 +48,7 @@ class Blockchain:
         #최초블록만 존재하는 경우는 검증하지 않음
         try:
             assert len(self.chain) > 1
+
         except:
             result = {'result': False, 'msg':'거래블록 생성 전입니다.'}
             error_bit = 1
@@ -58,10 +57,9 @@ class Blockchain:
             prev_block_hash = self.chain[-2]['block_hash']
             cur_block_hash = self.chain[-1]['header']['previous_hash']
 
-            print('Hash Set:' + prev_block_hash + ',' + cur_block_hash )
-
             if prev_block_hash == cur_block_hash:
                 result = {'result': True, 'msg': '검증성공'}
+
             else: 
                 result = {'result': False, 'msg': '검증실패'}
 

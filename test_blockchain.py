@@ -1,8 +1,7 @@
-from unittest import TestCase
 from blockchain import Blockchain
 from creathash import *
 
-class BlockchainTestCase(TestCase):
+class BlockchainTestCase:
 
     def setUp(self):
         #최초블록 생성
@@ -28,12 +27,13 @@ class BlockchainTestCase(TestCase):
 
         if result['result']:
             print("이전 해시 검증 완료")
+            
         else:
             print("해시값 불일치!")
         
         return result
 
-class TestBlocksAndTransactions(BlockchainTestCase):
+class TestSingleNodeAndBlocks(BlockchainTestCase):
 
     def test_block_creation(self):
         self.create_block()
@@ -50,12 +50,5 @@ class TestBlocksAndTransactions(BlockchainTestCase):
 
         return index
 
-    def test_return_last_block(self):
-        self.create_block()
-
-        created_block = self.blockchain.last_block
-
-        assert created_block is self.blockchain.chain[-1]
-        return created_block
 
 

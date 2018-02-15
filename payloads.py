@@ -4,7 +4,7 @@ from creathash import *
 from flask import Flask, jsonify, request
 
 #초기 블록 생성
-test_obj = TestBlocksAndTransactions()
+test_obj = TestSingleNodeAndBlocks()
 test_obj.setUp()
 
 app = Flask(__name__)
@@ -12,16 +12,20 @@ app = Flask(__name__)
 #새로운 거래발생 및 블록등록
 @app.route('/transactions/new', methods=['POST'])
 def new_transaction():
+	#신규 거래 및 블록 생성
+
 	values = request.form
 
-	required = ['sender', 'recipient', 'amount']
-	if not all(k in values.keys() for k in required):
-		return 'Missing values', 400
+	available_arg_list = ['sender', 'recipient', 'amount']
+	if not all(k in values.keys() for k in available_arg_list):
+		return '정당한 파라미터가 아닙니다.', 400
 
 	index = test_obj.test_create_transaction(values['sender'], values['recipient'], values['amount'])
+
 	test_obj.test_block_creation()
 
-	response = {'message': f'Transaction will be added to Block {index}'}
+	response = {'message': f'이번 거래는 {index} 블록에 등록됩니다.'}
+
 	return jsonify(response), 201
 
 #체인에 연결된 블록리스트 출력
