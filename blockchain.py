@@ -3,13 +3,20 @@ from creathash import *
 import json
 
 class Blockchain:
-    def __init__(self):
+    def __init__(self, address):
         self.current_transactions = []
         self.chain = []
         self.nodes = []
         self.new_block(previous_hash='0')
         #최초 생성시 자신을 노드리스트에 추가하며, 최초 노드가 마스터가됨
-        self.register_node('127.0.0.1:5000', False ,1)
+        try:
+            if address == '127.0.0.1:5000':
+                self.register_node(address, True, 1)
+            else:
+                self.register_node(address, True, 2)
+        except: 
+            return False
+
 
     def new_block(self, previous_hash):
         #새로운 블록을 생성 후 체인에 등록한다
@@ -79,7 +86,7 @@ class Blockchain:
                 self.node = Node()
                 self.node_info = self.node.set_node_info(address, status, node_type)
                 self.nodes.append(self.node_info)
-                print(json.dumps(self.nodes))
+                #print(json.dumps(self.nodes))
                 result =  {'result':True , 'msg':'노드 등록 성공'}
             elif dup_check == 2:
                 result =  {'result':True , 'msg':'비활성 노드를 활성화합니다.'}
@@ -114,7 +121,9 @@ class Blockchain:
 
     def spread_node_list(self):
         #활성상태인 모든 모드에 새로등록되거나 상태가 변경된 노드를 전송함
-        print('전송대상 노드:', json.dumps(self.nodes[-1], indent = 4, sort_keys=True))
+        #print('전송대상 노드:', json.dumps(self.nodes[-1], indent = 4, sort_keys=True))
+        return True
+
 
     @property
     def last_block(self):

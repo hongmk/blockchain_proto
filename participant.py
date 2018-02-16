@@ -1,5 +1,45 @@
-import http.client, urllib.parse
+#import http.client, urllib.parse
 import json
+#import requests
+from httpquery import HttpQuery
+from blockchain import Blockchain, Node
+
+class ChainNode(Blockchain):
+	def __init__(self):
+		self.other_nodes=[]
+		self.http_req = HttpQuery()
+		self.result = []
+		self.my_address = '127.0.0.1:5003'
+
+	def get_node_list(self, address):
+		self.result = self.http_req.send_request('GET', address)
+
+	def register_node(self, address, params):
+		self.result = self.http_req.send_request('POST', address, params)
+
+def test_node(type):
+	obj = ChainNode()
+	address = 'http://127.0.0.1:5000'
+	params = {'address':obj.my_address}
+
+	if type == 1: 	#GET Node List
+		obj.get_node_list(address+'/nodes/list')
+
+	elif type == 2: #POST register Node
+		obj.register_node(address+'/nodes/register', params)
+
+	else:
+		return {'result':False, 'data':'정당한 거래구분이 아닙니다'}
+
+	print(obj.result)
+	
+	return True
+
+if __name__ == "__main__":
+	test_node(1)
+	test_node(2)
+	test_node(1)
+
 
 """
 #GET 요청 -> 응답내용을 JSON객체로 변환

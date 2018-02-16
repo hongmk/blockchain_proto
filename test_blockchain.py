@@ -5,7 +5,7 @@ class BlockchainTestCase:
 
     def setUp(self):
         #최초블록 생성
-        self.blockchain = Blockchain()
+        self.blockchain = Blockchain('127.0.0.1:5000')
 
     def create_transaction(self, sender='a', recipient='b', amount=1):
         #거래내역 생성
