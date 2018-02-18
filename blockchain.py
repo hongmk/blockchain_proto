@@ -1,22 +1,29 @@
 from time import time
 from creathash import *
 import json
+from httpquery import HttpQuery
 
 class Blockchain:
+
     def __init__(self, address):
         self.current_transactions = []
         self.chain = []
-        self.nodes = []
-        self.new_block(previous_hash='0')
+        self.nodes = []   
+        self.node_type = 0
+        self.http_req = HttpQuery()
+        self.address = address
         #최초 생성시 자신을 노드리스트에 추가하며, 최초 노드가 마스터가됨
         try:
             if address == '127.0.0.1:5000':
-                self.register_node(address, True, 1)
+                self.node_type = 1
+                #self.register_node(address, True, self.node_type)
+                self.new_block(previous_hash='0')
             else:
-                self.register_node(address, True, 2)
+                self.node_type = 2
+                self.register_node('127.0.0.1:5000', True, 1) #노드 생성 시 마스터노드는 디폴트로 등록함
+                #self.register_node(address, True, self.node_type)
         except: 
-            return False
-
+            return None
 
     def new_block(self, previous_hash):
         #새로운 블록을 생성 후 체인에 등록한다
@@ -37,6 +44,9 @@ class Blockchain:
             'nonce': 0
         }
 
+        #생성된 거래내역을 다른 노드에 전송
+        #self.spread_transaction(self.current_transactions[-1])
+
         self.current_transactions = []
         self.chain.append(block)
         return block
@@ -49,7 +59,10 @@ class Blockchain:
             'amount': amount,
         })
 
-        return self.last_block['header']['version'] + 1
+        if len(self.chain) == 0:
+            return 1
+        else:
+            return self.last_block['header']['version'] + 1
 
     def verify_of_chain(self):
         result = {}
@@ -75,6 +88,7 @@ class Blockchain:
 
     def register_node(self, address, status=True, node_type=2):
         #노드중복체크 -> 노드생성 -> 노드등록 프로세스임 
+
         dup_check = 0
         if len(self.nodes) > 0:
             dup_check = self.check_node_dup(address)
@@ -91,8 +105,9 @@ class Blockchain:
             elif dup_check == 2:
                 result =  {'result':True , 'msg':'비활성 노드를 활성화합니다.'}
 
-            #새로 생성되거나 상태가 변경된 노드를 다시 전송함
-            self.spread_node_list()
+            #새로 생성되거나 상태가 변경된 노드를 참가자 노드에 전송함
+            if self.node_type == 1:
+                self.spread_node_list(address)
 
         else:
             result = {'result':False , 'msg':'이미 활성상태인 노드가 존재합니다.'}
@@ -119,9 +134,57 @@ class Blockchain:
 
         return result       
 
-    def spread_node_list(self):
+    def spread_node_list(self, register_address):
         #활성상태인 모든 모드에 새로등록되거나 상태가 변경된 노드를 전송함
         #print('전송대상 노드:', json.dumps(self.nodes[-1], indent = 4, sort_keys=True))
+        if len(self.nodes) > 1:
+
+            for node in self.nodes:
+                address = ''
+                params = {}
+                nodes_size = len(self.nodes)
+                #마지막(현재추가된) 노드는 전송 대상에서 제외함
+                if node['status'] == True and node['address'] != register_address:
+                    address = 'http://'+node['address']+'/nodes/register'
+                    params = {'address': register_address}
+                    print('address:', node['address'], 'params:', params)
+                    result = self.http_req.send_request('POST', address, params)
+
+                    #if node['address'] != register_address:
+                    #새로추가된 노드에는 활성화된 노드를 모두 전송해줌
+                    address = 'http://'+register_address+'/nodes/register'
+                    params = {'address': node['address']}
+                    print('마지막 노드에 전송 address:', node['address'], 'params:', params)
+                    result = self.http_req.send_request('POST', address, params)
+        return True
+
+    def get_node_count(self):
+        #노드 총 개수 전달
+        return {'result': True, 'data':len(self.nodes)}
+
+    #내부용
+    def spread_transaction(self, transaction):
+        print('거래전송', transaction)
+        result = ''
+        index = 0
+        for node in self.nodes:
+            if self.address != node['address']: #현재 노드가 아닌 노드에만 전송
+                print('대상노드:', node, index)
+
+                address = 'http://'+node['address']+'/transactions/set'
+                params = {'transaction':transaction}
+
+                print('address:', address, 'params:', params)
+                self.http_req.send_request('POST', address, params)    
+            index = index + 1
+        return True
+
+    def set_transaction(self, transaction):
+        print('다른 노드로부터 전송된 거래수신', transaction)
+        self.current_transactions.append(transaction)
+        #previous_hash = '0'
+        #self.new_block(getHash(self.chain[-1]['header']))
+        #return self.last_block['header']['version'] + 1
         return True
 
 

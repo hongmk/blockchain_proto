@@ -3,8 +3,9 @@ import json
 #import requests
 from httpquery import HttpQuery
 from blockchain import Blockchain, Node
+from test_blockchain.py
 
-class ChainNode(Blockchain):
+class ChainNodeTest(BlockchainTestCase):
 	def __init__(self):
 		self.other_nodes=[]
 		self.http_req = HttpQuery()
@@ -17,16 +18,22 @@ class ChainNode(Blockchain):
 	def register_node(self, address, params):
 		self.result = self.http_req.send_request('POST', address, params)
 
+	def get_node_count(self, address):
+		self.result = self.http_req.send_request('GET', address)
+
 def test_node(type):
-	obj = ChainNode()
+	obj = ChainNodeTest()
 	address = 'http://127.0.0.1:5000'
 	params = {'address':obj.my_address}
+	result = []
 
 	if type == 1: 	#GET Node List
 		obj.get_node_list(address+'/nodes/list')
 
 	elif type == 2: #POST register Node
 		obj.register_node(address+'/nodes/register', params)
+	elif type == 3:
+		print(obj.get_node_count(address+'/nodes/count'))
 
 	else:
 		return {'result':False, 'data':'정당한 거래구분이 아닙니다'}
@@ -36,9 +43,10 @@ def test_node(type):
 	return True
 
 if __name__ == "__main__":
-	test_node(1)
+	#test_node(1)
 	test_node(2)
-	test_node(1)
+	#test_node(1)
+	test_node(3)
 
 
 """
